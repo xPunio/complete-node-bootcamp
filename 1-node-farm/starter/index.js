@@ -1,5 +1,6 @@
-// const fs = require("fs");
+const fs = require("fs");
 const http = require("http");
+const url = require("url");
 
 // bloacking, synchrinouse way
 // const textIn = fs.readFileSync('./txt/input.txt', 'utf-8');
@@ -25,12 +26,56 @@ const http = require("http");
 
 ////////////////////////////////////
 ///////// SERVER
+function replaceTemplate(template, product){
+    let result = template.replaceAll("{%product_name%}", product.productName);
+    output = output.replaceAll("{%image%}", product.image);
+    output = output.replaceAll("{%price%}", product.price);
+    output = output.replaceAll("{%from%}", product.from);
+    output = output.replaceAll("{%nutrients%}", product.nutrients);
+    output = output.replaceAll("{%image%}", product.image);
+    output = output.replaceAll("{%image%}", product.image);
+    output = output.replaceAll("{%image%}", product.image);
+}
+
+const templateOverview = fs.readFileSync(__dirname + "/templates/overview.html", "utf8");
+const templateCard = fs.readFileSync(__dirname + "/templates/card.html", "utf8");
+const templateProduct = fs.readFileSync(__dirname + "/templates/product.html", "utf8");
+
+const data = fs.readFileSync(`${__dirname}/dev-data/data.json`, "utf8");
+const dataObject = JSON.parse(data);
 
 const server = http.createServer((request, response) => {
-  response.end("Hello from the server!");
+    console.log(request.url);
+
+    const pathName = request.url
+
+    if(pathName === '/' || pathName === '/overview'){
+        response.writeHead(200, {"Content-Type": "text/html"});
+
+        const cardsHtml = dataObject.map((el) => replaceTemplate(templateCard, el))
+
+        response.end(templateOverview)
+
+
+
+    } else if(pathName === '/product'){
+        response.end("this is the product")
+
+
+
+    } else if(pathName === '/api') {
+        response.writeHead(200, {"Content-Type": "application/json"});
+        response.end(data);
+
+
+    } else {
+        response.writeHead(404, {
+            "Content-Type": "text/html"
+        })
+        response.end("<h1>Not Found</h1>")
+    }
 });
 
 server.listen(8000, "127.0.0.1", () => {
-  console.log("Server started on port 8080");
+    console.log("Server started on port 8080");
 });
-
